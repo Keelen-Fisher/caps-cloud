@@ -1,5 +1,7 @@
 # AWS: Events
 
+## Author: Keelen Fisher
+
 ## Overview
 
 - Using only AWS Services: SQS, SNS, Lambda, create a cloud version of the CAPS system
@@ -62,3 +64,4 @@ Once you have the appropriate queues and topics setup at SNS and SQS, you’ll n
 
 ## UML Diagram
 
+![UML](assets/Lab%2019%20UML%202.png)

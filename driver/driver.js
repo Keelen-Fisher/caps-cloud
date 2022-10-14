@@ -1,26 +1,48 @@
 'use strict'
-const AWS = require('aws-sdk');
 
-// do some config
-// Use CAUTION with credentials, do not add credentials to github 
+const { Consumer } = require('sqs-consumer');
+const { Producer } = require('sqs-producer');
+const Chance = require('chance');
+const chance = new Chance();
 
-// AWS.config.update({})
+const producer = Producer.create({
+  queueUrl: 'https://sqs.us-west-1.amazonaws.com/324528892959/lab19Queue',
+  region: 'us-west-1'
+});
 
-const sns = new AWS.SNS();
 
-const topic = 'arn:aws:sns:us-west-1:324528892959:caps:869beea6-70f5-4673-bcb9-940fb2c2d49c';
+async function driver(data){
+  let message = '';
+  try{
+    let body = JSON.parse(data.Body)
+    message = body.Message
+    console.log(message);
+  } catch (e){
+    console.log('incorrect output', e.message);
+  }
 
-// opinionated AWS requires case sensitive keys (caps in the first letter)
-const payload = {
-  Message: 'Here is my Message',
-  TopicArn: topic,
+  let stringMessage = JSON.stringify(message);
 
+  let payload = {
+    id: 'id',
+    body: stringMessage,
+    groupId: 'CodeFellowsGroup',
+    deduplcationId: chance.postal(),
+  }
+
+  try {
+    let response = await producer.send(payload);
+    console.log(response);
+  }
+  catch (e){
+    console.log(e);
+  }
 }
 
-sns.publish(payload, (err, data) => {
+const app = Consumer.create({
+  queueUrl: 'https://sqs.us-west-1.amazonaws.com/324528892959/lab19Confirmation',
+  handleMessage: driver
+});
 
-  if(err){
-    console.err(err);
-  }
-  console.log(data)
-})
+
+app.start();
